@@ -1,0 +1,98 @@
+<html>
+  <body>
+  </body>
+  <script src="http://localhost:3000/game"></script>
+  <script src="http://localhost:3000/gameDisplay"></script>
+  <script src="http://localhost:3000/gameControl"></script>
+  <script src="http://localhost:3000/gameKeycode"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  
+    
+    (function () {
+      // début du code isolé
+
+      var socket = io();
+
+      var requestAnimId;
+      
+      let playerNumber ; 
+      var initialisation = function() {
+        // le code de l'initialisation
+
+        socket.on("player", (data) =>{
+          playerNumber = data ;
+          console.log(playerNumber);
+        });
+
+        game.init();
+        requestAnimId = window.requestAnimationFrame(main); // premier appel de main au rafraîchissement de la page
+      }
+      
+      var main = function() {
+        socket.on("session", (id) => {
+       //   console.log("mon id est " + id);
+        });
+
+        // le code du jeu
+        game.clearLayer(game.playersBallLayer);
+
+        if(playerNumber === "player1"){
+          game.movePlayer1();
+          socket.emit("playerOne move", game.playerOne);
+        }
+
+        if(playerNumber === "player2"){
+          game.movePlayer2();
+          socket.emit("playerTwo move", game.playerTwo);
+        }
+
+        if(playerNumber === "player3"){
+          game.movePlayer3();
+          socket.emit("playerThree move", game.playerThree);
+        }
+
+        if(playerNumber === "player4"){
+          game.movePlayer4();
+          socket.emit("playerFour move", game.playerFour);
+        }
+
+        socket.on("updatePosP1", (player)=>{
+          game.playerOne.posY = player.posY ;
+        });
+
+        socket.on("updatePosP2", (player)=>{
+          game.playerTwo.posY = player.posY ;
+        });
+
+        socket.on("updatePosP3", (player)=>{
+          game.playerThree.posY = player.posY ;
+        });
+
+        socket.on("updatePosP4", (player)=>{
+          game.playerFour.posY = player.posY ;
+        });
+        game.displayPlayers();
+        game.moveBall();
+        game.collideBallWithPlayersAndAction();
+
+        socket.emit("updatePosBall", game.ball);
+        socket.on("updatePosBallFromServer", (ball) =>{
+          game.ball.posX = ball.posX;
+          game.ball.posY = ball.posY;
+          game.ball.directionX = ball.directionX;
+          game.ball.directionY = ball.directionY;
+        });
+        
+        requestAnimId = window.requestAnimationFrame(main); // rappel de main  au prochain rafraîchissement de la page
+      }
+      
+      window.onload = initialisation; // appel de la fonction initialisation au chargement de la page
+     
+      // fin du code isolé
+    })();
+
+    
+    </script>
+</html>
+    
